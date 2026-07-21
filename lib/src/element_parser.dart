@@ -24,8 +24,7 @@ abstract class GS1ElementParser {
 
   double parseFloatingPoint(String numberPart, int numberOfDecimals) {
     final offset = numberPart.length - numberOfDecimals;
-    final numberPartFloat =
-        numberPart.substring(0, offset) + '.' + numberPart.substring(offset);
+    final numberPartFloat = numberPart.substring(0, offset) + '.' + numberPart.substring(offset);
     return double.parse(numberPartFloat);
   }
 
@@ -40,14 +39,12 @@ abstract class GS1ElementParser {
 
 class GS1DateParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final offset = ai.code.length + ai.fixLength;
     final elementStr = data.substring(0, min(offset, data.length));
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final elementDate = elementStr.substring(ai.code.length);
@@ -72,21 +69,18 @@ class GS1DateParser extends GS1ElementParser {
 
 class GS1DateTimeParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final posOfGS = data.indexOf(config.groupSeparator);
     final offset = posOfGS == -1 ? data.length : posOfGS;
     final elementStr = data.substring(0, offset);
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final rawData = elementStr.substring(ai.code.length);
     final elementDateTime = rawData.padRight(12, '0');
-    var year =
-        _year2ToYear4(int.parse(elementDateTime.substring(0, 2), radix: 10));
+    var year = _year2ToYear4(int.parse(elementDateTime.substring(0, 2), radix: 10));
     final month = int.parse(elementDateTime.substring(2, 4), radix: 10);
     final day = int.parse(elementDateTime.substring(4, 6), radix: 10);
     final hour = int.parse(elementDateTime.substring(6, 8), radix: 10);
@@ -110,15 +104,13 @@ class GS1DateTimeParser extends GS1ElementParser {
 
 class GS1ElementFixLengthParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final offset = ai.code.length + ai.fixLength;
 
     final elementStr = data.substring(0, min(offset, data.length));
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
     final elementValue = elementStr.substring(ai.code.length);
 
@@ -135,23 +127,18 @@ class GS1ElementFixLengthParser extends GS1ElementParser {
 
 class GS1ElementFixLengthMeasureParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final offset = ai.code.length + ai.fixLength;
 
     final elementStr = data.substring(0, min(offset, data.length));
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final elementValue = elementStr.substring(ai.code.length);
 
-    final element = GS1ParsedElement<double>(
-        rawData: elementValue,
-        aiCode: ai.code,
-        data: parseFloatingPoint(elementValue, ai.numberOfDecimalPlaces));
+    final element = GS1ParsedElement<double>(rawData: elementValue, aiCode: ai.code, data: parseFloatingPoint(elementValue, ai.numberOfDecimalPlaces));
     final rest = getRest(data, offset, config);
 
     return ParsedElementWithRest(element: element, rest: rest);
@@ -160,15 +147,13 @@ class GS1ElementFixLengthMeasureParser extends GS1ElementParser {
 
 class GS1VariableLengthParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final posOfGS = data.indexOf(config.groupSeparator);
     final offset = posOfGS == -1 ? data.length : posOfGS;
     final elementStr = data.substring(0, offset);
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final elementValue = elementStr.substring(ai.code.length);
@@ -189,49 +174,38 @@ class GS1VariableLengthParser extends GS1ElementParser {
 
 class GS1VariableLengthMeasureParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final posOfGS = data.indexOf(config.groupSeparator);
     final offset = posOfGS == -1 ? data.length : posOfGS;
     final elementStr = data.substring(0, offset);
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final numberPart = data.substring(ai.code.length, offset);
     final rest = getRest(data, offset, config);
-    final element = GS1ParsedElement<double>(
-        rawData: numberPart,
-        aiCode: ai.code,
-        data: parseFloatingPoint(numberPart, ai.numberOfDecimalPlaces));
+    final element = GS1ParsedElement<double>(rawData: numberPart, aiCode: ai.code, data: parseFloatingPoint(numberPart, ai.numberOfDecimalPlaces));
     return ParsedElementWithRest(element: element, rest: rest);
   }
 }
 
 class GS1VariableLengthWithISONumbersParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final posOfGS = data.indexOf(config.groupSeparator);
     final offset = posOfGS == -1 ? data.length : posOfGS;
     final elementStr = data.substring(0, offset);
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final numberPart = elementStr.substring(ai.code.length + 3);
     final isoPart = elementStr.substring(ai.code.length, ai.code.length + 3);
 
     final rest = getRest(data, offset, config);
-    final element = GS1ParsedElement<double>(
-        rawData: elementStr.substring(ai.code.length),
-        aiCode: ai.code,
-        iso: isoPart,
-        data: parseFloatingPoint(numberPart, ai.numberOfDecimalPlaces));
+    final element = GS1ParsedElement<double>(rawData: elementStr.substring(ai.code.length), aiCode: ai.code, iso: isoPart, data: parseFloatingPoint(numberPart, ai.numberOfDecimalPlaces));
 
     return ParsedElementWithRest(element: element, rest: rest);
   }
@@ -239,15 +213,13 @@ class GS1VariableLengthWithISONumbersParser extends GS1ElementParser {
 
 class GS1VariableLengthWithISOCharsParser extends GS1ElementParser {
   @override
-  ParsedElementWithRest call(
-      String data, AI ai, GS1BarcodeParserConfig config) {
+  ParsedElementWithRest call(String data, AI ai, GS1BarcodeParserConfig config) {
     final posOfGS = data.indexOf(config.groupSeparator);
     final offset = posOfGS == -1 ? data.length : posOfGS;
     final elementStr = data.substring(0, offset);
 
     if (!verify(elementStr, ai)) {
-      throw GS1ParseException(
-          message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
+      throw GS1ParseException(message: 'Data format mismatch ${ai.regExp} for AI ${ai.code}');
     }
 
     final charPart = elementStr.substring(ai.code.length + 3);
